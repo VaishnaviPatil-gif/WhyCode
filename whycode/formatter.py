@@ -3,15 +3,12 @@
 from __future__ import annotations
 
 import json
-import sys
-from datetime import datetime
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.rule import Rule
 from rich.table import Table
 from rich import box
-from rich.text import Text
 
 from whycode.models import ExplainResult, TimelineEntry
 

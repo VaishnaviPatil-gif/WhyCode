@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from whycode.git_parser import GitParser, GitParserError
-from whycode.models import BlameChunk
 
 
 def _make_mock_commit(
