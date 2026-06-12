@@ -320,3 +320,4 @@ Please add or update tests for any new behaviour. All CI checks must pass.
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
