@@ -1,0 +1,2 @@
+[console_scripts]
+whycode = whycode.cli:main
