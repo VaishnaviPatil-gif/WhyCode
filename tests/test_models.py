@@ -1,6 +1,6 @@
 """Tests for data models."""
 
-from whycode.models import AIExplanation, BlameChunk, CommitInfo, ExplainResult, TimelineEntry
+from whycode.models import ExplainResult, TimelineEntry
 
 
 def test_ai_explanation_to_dict(sample_explanation):
