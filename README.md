@@ -1,323 +1,336 @@
-# whycode
+# WhyCode
 
-> **AI-powered Git history explorer — understand how code evolved over time.**
+> **AI-powered Git history explorer that explains why code exists, not just who wrote it.**
 
-<!--
-  TODO: Replace with actual terminal GIF
-  ![whycode demo](docs/demo.gif)
--->
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![License](https://img.shields.io/github/license/VaishnaviPatil-gif/WhyCode)
+![GitHub Actions](https://img.shields.io/github/actions/workflow/status/VaishnaviPatil-gif/WhyCode/test.yml?branch=main)
+![Version](https://img.shields.io/badge/version-0.1.0-green)
 
 ---
 
-## The Problem
+## What is WhyCode?
 
-Git blame tells you *who* wrote a line. Git log tells you *when* it changed.  
-But **why** does this function exist? Why was that flag added? Why did the retry logic appear?
+Git can tell you:
 
-Answering those questions usually means manually reading commits, hunting for linked tickets, and asking the original author — if they're still around.
+* **Who** changed a line (`git blame`)
+* **When** it changed (`git log`)
+* **What** changed (`git diff`)
 
-`whycode` automates that entire process by feeding Git context to an LLM and returning a clear explanation in seconds.
+But it rarely tells you:
+
+* Why was this code introduced?
+* What problem was it solving?
+* Why was this design chosen?
+* How did this file evolve over time?
+
+**WhyCode** bridges that gap by combining Git history with AI-powered analysis to generate human-readable explanations of code evolution.
+
+Instead of manually reading dozens of commits, WhyCode summarizes the intent behind code changes in seconds.
 
 ---
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| **Explain mode** | Analyses `git blame` output and generates per-chunk AI explanations |
-| **Timeline mode** | Summarises the evolution of a file across its entire Git history |
-| **JSON output** | Machine-readable output for CI pipelines or custom tooling |
-| **Multiple AI providers** | OpenAI, Anthropic Claude, or local Ollama — plug and play |
-| **Disk cache** | Explanations are cached by commit, provider, and prompt version |
-| **Confidence + context quality** | AI rates certainty and shows how strong the Git context is |
+| Feature                  | Description                                                                 |
+| ------------------------ | --------------------------------------------------------------------------- |
+| 🔍 Explain Mode          | Analyze a file using Git blame and generate AI explanations for code chunks |
+| 📅 Timeline Mode         | Summarize how a file evolved across its Git history                         |
+| 🤖 Multiple AI Providers | Supports OpenAI, Claude, and local Ollama models                            |
+| ⚡ Local AI Support       | Run completely offline with Ollama                                          |
+| 💾 Smart Caching         | Cache explanations to avoid repeated AI requests                            |
+| 📊 JSON Output           | Machine-readable output for automation and CI pipelines                     |
+| 🎯 Confidence Scoring    | AI rates confidence and context quality for each explanation                |
+
+---
+
+## Why WhyCode?
+
+Imagine joining a new project.
+
+You discover a strange function, a complicated flag, or an unusual workaround.
+
+Normally you'd have to:
+
+1. Search commit history
+2. Read multiple diffs
+3. Track related changes
+4. Ask the original author
+
+WhyCode automates that workflow and answers:
+
+> "Why is this code here?"
 
 ---
 
 ## Installation
 
-### From source (recommended during development)
+### Clone Repository
 
 ```bash
-git clone https://github.com/you/whycode.git
-cd whycode
-pip install -e ".[dev]"
+git clone https://github.com/VaishnaviPatil-gif/WhyCode.git
+cd WhyCode
 ```
 
-### From PyPI (once published)
+### Install
 
 ```bash
-pip install whycode
+pip install -e .
+```
+
+### Development Installation
+
+```bash
+pip install -e ".[dev]"
 ```
 
 ---
 
 ## Quick Start
 
+### Explain a File
+
 ```bash
-# Copy and fill in your provider credentials
-cp .env.example .env
-
-# Show file evolution over time
-whycode app.py --timeline
-
-# Explain a file using the default provider (Ollama by default)
 whycode app.py
+```
 
-# Use OpenAI
-whycode app.py --provider openai
+### Generate Timeline
 
-# Use Claude
-whycode app.py --provider claude
+```bash
+whycode app.py --timeline
+```
 
-# Output JSON for scripting
+### JSON Output
+
+```bash
 whycode app.py --json
+```
+
+### Use OpenAI
+
+```bash
+whycode app.py --provider openai
+```
+
+### Use Claude
+
+```bash
+whycode app.py --provider claude
+```
+
+### Use Ollama
+
+```bash
+whycode app.py --provider ollama
 ```
 
 ---
 
-## Output Examples
+## Example Output
 
-### Default explain mode
-
-```text
-────────────────────── whycode  app.py ──────────────────────
-
-Lines 120–145  │  a7b3f2c  by Jane Doe  2024-03-15
-  Add retry mechanism for API failures
-
-╭────────────────────────────────────────────────────────────╮
-│  Summary: Added retry logic for resilient API calls.       │
-│                                                            │
-│  Rationale: External APIs can fail transiently due to      │
-│  network issues. A retry mechanism with exponential        │
-│  back-off reduces user-visible errors without manual       │
-│  intervention.                                             │
-│                                                            │
-│  Confidence: 82/100                                        │
-│  Context Quality: High                                     │
-╰────────────────────────────────────────────────────────────╯
-```
-
-### Timeline mode
-
-<!--
-  TODO: Replace with actual terminal GIF
-  ![timeline demo](docs/timeline.gif)
--->
+### Explain Mode
 
 ```text
-──────────────────── whycode timeline  app.py ───────────────
+─────────────────── whycode cli.py ───────────────────
 
-  2024-01   Added premium subscription support
-  2024-03   Fixed duplicate billing issue
-  2024-07   Refactored subscription validation logic
-  2025-01   Added family plan with shared quota
+Lines 1–226 │ ea31271 │ Initial CLI implementation
+
+Summary:
+Initial CLI implementation for whycode project.
+
+Rationale:
+This commit established the command-line interface,
+provider selection system, and project structure.
+
+Confidence: 95/100
+Context Quality: High
 ```
 
-### JSON mode
+---
 
-```json
-[
-  {
-    "file": "app.py",
-    "lines": { "start": 120, "end": 145 },
-    "author": "Jane Doe",
-    "email": "jane@example.com",
-    "date": "2024-03-15T00:00:00+00:00",
-    "commit": "a7b3f2c",
-    "message": "Add retry mechanism for API failures",
-    "explanation": {
-      "summary": "Added retry logic for resilient API calls.",
-      "rationale": "External APIs can fail transiently…",
-      "confidence": 82,
-      "context_quality": "High"
-    }
-  }
-]
+### Timeline Mode
+
+```text
+──────────────── whycode timeline ────────────────
+
+2026-06  Initial project structure
+2026-06  Added Git parsing functionality
+2026-06  Added AI provider support
+2026-06  Added caching system
+2026-06  Improved CLI output formatting
 ```
 
 ---
 
 ## Architecture
 
-```
-whycode/
+```text
+whycode
 │
-├── pyproject.toml          ← package metadata & dependencies
-├── .env.example            ← environment variable template
+├── cli.py
+├── git_parser.py
+├── ai_engine.py
+├── cache.py
+├── formatter.py
+├── config.py
+├── models.py
 │
-├── whycode/
-│   ├── __init__.py
-│   ├── cli.py              ← Click CLI — parses flags, coordinates modules
-│   ├── git_parser.py       ← GitPython wrapper — blame, log, diff extraction
-│   ├── ai_engine.py        ← compatibility facade
-│   ├── config.py           ← environment-backed settings
-│   ├── cache.py            ← diskcache-backed explanation store
-│   ├── formatter.py        ← Rich terminal output + JSON serialisation
-│   ├── models.py           ← Shared dataclasses (CommitInfo, BlameChunk, …)
-│   └── ai/
-│       ├── base.py
-│       ├── openai_provider.py
-│       ├── claude_provider.py
-│       └── ollama_provider.py
-│
-└── tests/
-    ├── conftest.py
-    ├── test_models.py
-    ├── test_ai_engine.py
-    ├── test_cache.py
-    └── test_git_parser.py
+└── ai
+    ├── base.py
+    ├── openai_provider.py
+    ├── claude_provider.py
+    └── ollama_provider.py
 ```
 
-### Data flow
+### Workflow
 
-```
-whycode app.py
+```text
+Git History
      │
      ▼
- cli.py  ──► git_parser.py  ──► BlameChunk list
-     │              │
-     │              └─► CommitInfo (hash, diff, nearby commits)
+Git Parser
      │
      ▼
- cache.py  ──► hit? ──► return AIExplanation
-                │
-               miss
-                │
-                ▼
-          ai_engine.py  ──► ai/base.py
-                         ──► ai/openai_provider.py
-                         ──► ai/claude_provider.py
-                         ──► ai/ollama_provider.py
-                │
-                ▼
-          AIExplanation  ──► cache.py (save)
-                │
-                ▼
-          formatter.py  ──► Rich terminal / JSON
+Blame Chunks + Commit Context
+     │
+     ▼
+AI Provider
+     │
+     ▼
+Explanation Generation
+     │
+     ▼
+Cache
+     │
+     ▼
+Rich Terminal Output / JSON
 ```
 
 ---
 
 ## Supported Providers
 
-| Provider | Flag | Env var for key |
-|---|---|---|
-| **Ollama** (local, free) | `--provider ollama` | — |
-| **OpenAI** | `--provider openai` | `OPENAI_API_KEY` |
-| **Anthropic Claude** | `--provider claude` | `ANTHROPIC_API_KEY` |
-
-Set the default in `.env`:
-
-```bash
-WHYCODE_DEFAULT_PROVIDER=ollama   # or openai / claude
-```
+| Provider | Local | API Key Required |
+| -------- | ----- | ---------------- |
+| OpenAI   | ❌     | ✅                |
+| Claude   | ❌     | ✅                |
+| Ollama   | ✅     | ❌                |
 
 ---
 
-## Local Ollama Setup
+## Ollama Setup
 
-1. Install Ollama from https://ollama.com
+Install Ollama:
 
-2. Pull a model:
+https://ollama.com
+
+Pull a model:
 
 ```bash
-ollama pull llama3        # recommended — good reasoning, fast
-ollama pull mistral       # lighter alternative
-ollama pull codellama     # code-focused option
+ollama pull qwen3:4b
 ```
 
-3. Confirm it's running:
+Verify installation:
 
 ```bash
 ollama list
 ```
 
-4. Set your model in `.env` (optional — defaults to `llama3`):
+Example:
 
-```bash
-WHYCODE_OLLAMA_MODEL=llama3
+```text
+qwen3:4b
 ```
 
-5. Run whycode:
+Run WhyCode:
 
 ```bash
-whycode app.py --provider ollama
+whycode app.py --provider ollama --model qwen3:4b
 ```
-
-Ollama runs entirely locally — no API key, no data leaving your machine.
 
 ---
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `WHYCODE_DEFAULT_PROVIDER` | `ollama` | Provider used when `--provider` is not set |
-| `OPENAI_API_KEY` | — | OpenAI API key |
-| `ANTHROPIC_API_KEY` | — | Anthropic API key |
-| `WHYCODE_OPENAI_MODEL` | `gpt-4o` | OpenAI model |
-| `WHYCODE_CLAUDE_MODEL` | `claude-sonnet-4-20250514` | Claude model |
-| `WHYCODE_OLLAMA_MODEL` | `llama3` | Ollama model |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
-| `WHYCODE_CACHE_DIR` | `~/.cache/whycode` | Cache directory |
-| `WHYCODE_CACHE_TTL` | `604800` (7 days) | Cache TTL in seconds |
-
----
-
-## CLI Reference
-
-```
-Usage: whycode [OPTIONS] FILE
-
-  whycode - understand how code evolved over time.
-
-Options:
-  --timeline        Show a chronological summary of major changes.
-  --json            Output results as JSON.
-  --provider TEXT   AI provider: openai | claude | ollama
-  --model TEXT      Specific model name for the chosen provider.
-  --no-cache        Skip cache for this run.
-  --clear-cache     Wipe the entire explanation cache and exit.
-  -V, --version     Show the version and exit.
-  -h, --help        Show this message and exit.
-```
+| Variable                 | Description         |
+| ------------------------ | ------------------- |
+| WHYCODE_DEFAULT_PROVIDER | Default AI provider |
+| OPENAI_API_KEY           | OpenAI API key      |
+| ANTHROPIC_API_KEY        | Anthropic API key   |
+| WHYCODE_OPENAI_MODEL     | OpenAI model        |
+| WHYCODE_CLAUDE_MODEL     | Claude model        |
+| WHYCODE_OLLAMA_MODEL     | Ollama model        |
+| OLLAMA_BASE_URL          | Ollama endpoint     |
+| WHYCODE_CACHE_DIR        | Cache directory     |
+| WHYCODE_CACHE_TTL        | Cache lifetime      |
 
 ---
 
 ## Running Tests
 
 ```bash
-pip install -e ".[dev]"
-pytest
-ruff check .
-pytest --cov=whycode       # with coverage report
+python -m pytest
+```
+
+Run linting:
+
+```bash
+python -m ruff check .
+```
+
+Run coverage:
+
+```bash
+pytest --cov=whycode
 ```
 
 ---
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/my-feature`
-3. Commit with clear messages: `git commit -m "feat: add X provider support"`
-4. Push and open a Pull Request
+Contributions are welcome.
 
-Please add or update tests for any new behaviour. All CI checks must pass.
+1. Fork the repository
+2. Create a feature branch
+
+```bash
+git checkout -b feature/my-feature
+```
+
+3. Commit your changes
+
+```bash
+git commit -m "feat: add new feature"
+```
+
+4. Push and open a Pull Request
 
 ---
 
 ## Roadmap
 
-- [ ] `--lines` flag to target specific line ranges
-- [ ] GitHub PR link detection from commit messages
-- [ ] VS Code / JetBrains extension
-- [ ] `--since` / `--until` date filtering for timeline mode
-- [ ] Interactive TUI (Textual)
+* [ ] Line-range explanations
+* [ ] GitHub PR integration
+* [ ] Commit issue-link detection
+* [ ] VS Code Extension
+* [ ] JetBrains Plugin
+* [ ] Interactive Terminal UI
+* [ ] Repository-wide analysis
+* [ ] Export explanations to Markdown
+
+---
+
+## Author
+
+**Vaishnavi Patil**
+
+GitHub:
+https://github.com/VaishnaviPatil-gif
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT License
 
+See the LICENSE file for details.
